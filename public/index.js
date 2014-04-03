@@ -12,11 +12,12 @@ var colorsArray = new Array("DarkMagenta","Chocolate","Coral ","Crimson","DarkBl
 var chosenColorList = new LinkedList();
 var canproceed = false;
 var proceeded = false;
-var socket;
+var socket = io.connect();
 var playerName = '';
 var html = '';
 var allUsers = [];
 var infoContainer = '';
+var playerReady = 1;
 
 // initialise the grid:
 window.onload = function (){
@@ -336,7 +337,7 @@ function definePlane(head, direction){
 		$(id).css("background-color", colorsArray[index]).css("opacity" , undefinedOpacity);
 
 		remove_from_openset(planeArray[planeNumber][i]);
-		console.log("removed from openset cell " + planeArray[planeNumber][i].i +", " + planeArray[planeNumber][i].j);
+		//console.log("removed from openset cell " + planeArray[planeNumber][i].i +", " + planeArray[planeNumber][i].j);
 
     }
 
@@ -352,7 +353,7 @@ function proceed(){
 	{
 		$('#right-grid-getReady').fadeOut('slow', function(){
 			html = $('#right-grid-selectOpp').html();
-			var intermediateHtml = "<div class='info-container' id='xx' style='margin-top: 125px;' >" +
+			var intermediateHtml = "<div class='info-container' id='playerNameContainer' style='margin-top: 125px;' >" +
 										"<input id = 'nameEnter' value='Enter your name here'></input>" + 
 								   		"<div class='btn' onClick='checkName()' style='float:right; margin-right:19px;' > Go </div> " +
 								   	"</div>";
@@ -367,18 +368,19 @@ function proceed(){
 }
 function checkName(){
 
-	if(infoContainer =='') 
-		infoContainer = $('#xx').html();
-
-	socket = io.connect();
-	socket.emit("setPlayerName", playerName);
-
+	if (infoContainer =='') 
+		infoContainer = $('#playerNameContainer').html();
+	
 	if (playerName !='' && playerName.length<15)
 	{
+		socket.emit("setPlayerName", playerName);
 
 		socket.on("playerNameStatus", function(data){
 		if (data == "ok")
 			{
+				socket.emit("setPlayerPlanes", planeArray);	
+				socket.emit("setPlayerReady", 1);									//player ready at the beginning
+
 				$('#right-grid-selectOpp').fadeOut('slow', function(){
 
 				$('#right-grid-selectOpp').html(html);
@@ -392,7 +394,7 @@ function checkName(){
 			else
 			{
 				var addition = "<div id='takenName' >Name already taken or forbidden</div>";
-				$('#xx').html(infoContainer + addition);
+				$('#playerNameContainer').html(infoContainer + addition);
 			}
 		});
 	}
@@ -401,10 +403,20 @@ function checkName(){
 
 //============================================================= DISPLAY PLAYERS ======================================
 
-if(socket != null)
-{
-	fetchedUsers();
-}
+	socket.on('playerReadyStatus', function(data){
+		
+		if(data.playerStatus == 1)													// if player ready
+		{
+			$('#' + data.playerName).removeClass();
+			$('#' + data.playerName).addClass('selectOpponent');
+		}
+		else
+		{
+			$('#' + data.playerName).removeClass();
+			$('#' + data.playerName).addClass('selectOpponentChange');
+		}
+	});
+
 
 function fetchedUsers() {
 		socket.on('users', function(data){
@@ -435,6 +447,49 @@ function filterOutput(){
 
 		$('#opponents').html(oppHtml);
 }
+
+//=========================================================PLAYER CHOOSING =================================================
+$(document).on("click", ".selectOpponent", function(){
+
+	var oppName = $(this).attr("id");
+
+	socket.emit('getPlayerReady', oppName);
+
+});
+
+socket.on('requestedPlayerReadyStatus', function(data){
+
+		if(data.playerStatus == 1)																// if player ready
+		{
+			socket.emit("askPlayerForGame", data.playerName);
+		}
+		else
+		{
+			alert(data.playerName + " is not ready.")
+		}
+});
+
+socket.on("questionForGame", function(opponent){
+
+	var response = confirm(opponent + " asks you to play a game together.");
+
+	if(response == true)
+	{
+		socket.emit("responseForGame", {playerName : opponent, response : 1} );
+	}
+	else
+	{
+		socket.emit("responseForGame", {playerName : opponent, response : 0} );
+	}
+});
+
+socket.on("playerDeclined", function(opponent){
+	alert(opponent + "  has rejected your request.");
+});
+
+socket.on("startingGame", function(){
+
+});
 //============================================================= UTILS ======================================================
 
 function resetGrid(){
@@ -642,8 +697,8 @@ function add_to_openset(cell){
 
 	openset[opensetSize] = cell;
 	opensetSize++;
-	console.log("added element " +cell.i + ", " + cell.j);
-	console.log("new size = "  + opensetSize);
+	//console.log("added element " +cell.i + ", " + cell.j);
+	//console.log("new size = "  + opensetSize);
 }
 function remove_from_openset(cell){
 
@@ -659,8 +714,8 @@ function remove_from_openset(cell){
 		opensetSize--;												// decrease set size.
 	}
 
-	console.log("removed element " + cell.i + ", " + cell.j);
-	console.log("new size = "  + opensetSize);
+	//console.log("removed element " + cell.i + ", " + cell.j);
+	//console.log("new size = "  + opensetSize);
 }
 
 function Cell(i,j) {
@@ -684,7 +739,7 @@ $(document).on("blur",'#nameEnter', function(){
 });
 
 $(document).on("keypress",'#nameEnter', function(e){
-	
+		playerName = $('#nameEnter').val();
 		if(e.which == 13)
 			checkName();
 });
@@ -702,6 +757,16 @@ $(document).on("blur",'#filterBox', function(){
 	}
 });
 
+$(document).on("click",'#ready', function(){
+	console.log(playerReady)
+
+	if (playerReady == 1)
+		playerReady = 0;
+	else
+		playerReady = 1;	
+
+	socket.emit("setPlayerReady", playerReady);
+});
 
 // ============================================= Linked list implementation ===========================================
 

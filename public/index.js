@@ -409,11 +409,13 @@ function checkName(){
 		{
 			$('#' + data.playerName).removeClass();
 			$('#' + data.playerName).addClass('selectOpponent');
+			playerReady = 1;
 		}
 		else
 		{
 			$('#' + data.playerName).removeClass();
 			$('#' + data.playerName).addClass('selectOpponentChange');
+			playerReady = 0;
 		}
 	});
 
@@ -453,20 +455,8 @@ $(document).on("click", ".selectOpponent", function(){
 
 	var oppName = $(this).attr("id");
 
-	socket.emit('getPlayerReady', oppName);
+	socket.emit("askPlayerForGame", oppName);
 
-});
-
-socket.on('requestedPlayerReadyStatus', function(data){
-
-		if(data.playerStatus == 1)																// if player ready
-		{
-			socket.emit("askPlayerForGame", data.playerName);
-		}
-		else
-		{
-			alert(data.playerName + " is not ready.")
-		}
 });
 
 socket.on("questionForGame", function(opponent){

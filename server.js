@@ -168,7 +168,7 @@ io.sockets.on('connection', function (socket) { 								// First connection
 		}
 		else																			// if the opponent is not ready.
 		{
-			socket.emit("playerDeclined", opponent.playerName );
+			socketArray[opponent.playerName].emit("playerDeclined", playerName );
 		}
 
 	});

@@ -1,0 +1,55 @@
+doctype html
+html
+  head
+    title  Paper Planes 
+    meta(charset='UTF-8')
+    link(rel='icon', type='image/png', href='logo.png')
+    link(rel='stylesheet', type='text/css', href='index.css') 
+    link(rel='stylesheet', href='skeleton.css')
+    link(rel='stylesheet', href='layout.css')
+    script(src="/socket.io/socket.io.js")
+    script(type='text/javascript', src='http://code.jquery.com/jquery-latest.min.js')
+    script(type='text/javascript', src='index.js')
+    link(rel='stylesheet', href='css/jquery-ui-1.10.4.custom.css')
+    script(src='js/jquery-1.10.2.js')
+    script(src='js/jquery-ui-1.10.4.custom.min.js')
+  body
+    span.title
+      | Paper Planes
+    br
+    span#battleships-title
+      | a 
+      span(style='color: OrangeRed;') battleships 
+      | spin-off
+    .container
+      .grid(style='padding: 0px; padding-bottom: 10px;')
+        #right-grid-getReady
+          span.text-box
+            span.info-container
+              span.info(style='margin-left: 28px;')
+                | a 
+                span(style='color: OrangeRed; opacity: 0.8;') Plane
+                br
+                | looks like this
+              span#example
+            span.info(style='margin: 10px 25px 0px 10px;')
+              | Draw 
+              span(style='color: OrangeRed; opacity: 0.8;') 3 
+              | of them and you're ready to go.
+          span.text-box
+            span.info-container
+              span#reset.btn  Reset 
+              span#clear_red.btn(onclick='clearRed()') Clear Red
+              span#randomise.btn(onclick='randomise()') Randomise
+              span.btn(onclick='proceed()')
+                span.proceed Proceed
+        #right-grid-selectOpp
+          input#filterBox(value='Type Here to Filter' onkeyup='filterOutput()')
+          #oppinfo
+            span.oppinfo#oppnumber Opponents:
+            span.oppinfo#ready ready
+            span.oppinfo#notready not ready
+          #chooseOpp Choose a ready Opponent.
+          #opponents
+      span.grid
+        span#grid-container

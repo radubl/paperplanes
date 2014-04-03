@@ -1,0 +1,17 @@
+{
+  "name":"PaperPlanes",
+  "engines": {
+    "node":"0.6.12",
+    "npm":"*"
+    },
+  "author":"RaduBlana",
+  "description":"tralalalal",
+  "dependencies": {
+  	"socket.io": "*",
+  	"express": "*",
+  	"jade": "*"
+  	  },
+  "scripts": {
+  	"start": "node server.js"
+  }
+}

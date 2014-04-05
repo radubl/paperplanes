@@ -65,8 +65,46 @@ io.sockets.on('connection', function (socket) { 								// First connection
 	});
 
 	socket.on('setPlayerPlanes', function(data){								// set player planes
-		//need to check for planes.
-		socket.set('playerPlanes', data);
+		
+		var truePlanes = true;
+		var tempPlaneArrayChecker = [];											// the set of the cells we have stored.
+
+		if(data.length != 3) 													// if player sent other than 3 planes
+			truePlanes = false;
+		else
+		{
+			for (var i = 2; i >= 0; i--) 
+			{
+			if(data[i].length != 8)												// if plane has a different number of cells
+			{
+				truePlanes = false;
+				break;
+			}
+			else
+			{
+				for (var j = 8; j >= 0; j--) 
+				{
+					if (tempPlaneArrayChecker.indexOf(data[i][j]) != -1)		// if we have seen this cell before, it's bad
+					{
+						truePlanes = false;
+						break;
+					}
+					else
+						tempPlaneArrayChecker.push(data[i][j]);
+				}
+			}
+
+			}
+		}
+		
+		if (truePlanes)
+		{
+			socket.set('playerPlanes', data);
+		}
+		else
+		{
+			socket.emit("wrongPlanes");
+		}
 	});
 
 	socket.on('getPlayerPlanes', function(){									// get player planes

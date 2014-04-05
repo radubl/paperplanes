@@ -69,25 +69,31 @@ io.sockets.on('connection', function (socket) { 								// First connection
 		var truePlanes = true;
 		var tempPlaneArrayChecker = [];											// the set of the cells we have stored.
 
+		
 		if(data.length != 3) 													// if player sent other than 3 planes
-			truePlanes = false;
+		{
+				truePlanes = false;
+			console.log("length 3");
+		}
 		else
 		{
 			for (var i = 2; i >= 0; i--) 
 			{
 			if(data[i].length != 8)												// if plane has a different number of cells
+			
 			{
 				truePlanes = false;
-				break;
+				break;console.log("length 8");
 			}
 			else
 			{
-				for (var j = 8; j >= 0; j--) 
+				for (var j = 7; j >= 0; j--) 
 				{
 					if (tempPlaneArrayChecker.indexOf(data[i][j]) != -1)		// if we have seen this cell before, it's bad
 					{
 						truePlanes = false;
 						break;
+						console.log("contains");
 					}
 					else
 						tempPlaneArrayChecker.push(data[i][j]);

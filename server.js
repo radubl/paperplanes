@@ -40,8 +40,7 @@ server.listen(process.env.PORT || appPort)
 console.log("Server listening on port 16558");
 
 // Handle the socket.io connections
-
-var users = 0; 																	//count the users
+																				//count the users
 
 io.sockets.on('connection', function (socket) { 								// First connection
 
@@ -50,7 +49,7 @@ io.sockets.on('connection', function (socket) { 								// First connection
 	socket.on('setPlayerName', function (data) { 								// Assign a name to the user
 		if (userArray.indexOf(data) == -1 && noSwear(data) && data != '') 		// Test if the name is already taken
 		{
-			users += 1; 														// Add 1 to the count 	
+
 			socket.set('playerName', data, function(){
 				userArray.push(data);
 				socketArray[data] = socket;
@@ -94,7 +93,6 @@ io.sockets.on('connection', function (socket) { 								// First connection
 			});
 
 			io.sockets.emit('playerReadyStatus',{ playerStatus : playerReadyStatus, playerName : playerName });
-
 		});
 		
 	});
@@ -116,7 +114,6 @@ io.sockets.on('connection', function (socket) { 								// First connection
 	});
 
 	socket.on('disconnect', function () { 										// disconnection of the client
-		users -= 1;
 		if (playerNameSet(socket))
 		{
 			var playerName;
@@ -129,10 +126,42 @@ io.sockets.on('connection', function (socket) { 								// First connection
 			userArray.splice(index, 1);	
 			socketArray[playerName] = null;
 		}
+		var pairIndex;
+		var oppSocket = null;															// let's check if the player disconnects
+		
+		for (var i = pairArray.length - 1; i >= 0; i--) 								// during a game
+			{																			// searching for opponent's socket
+
+				if (pairArray[i].player1 == socket)
+				{
+					oppSocket = pairArray[i].player2;
+					pairIndex = i;
+					break;
+				}
+
+				if (pairArray[i].player2 == socket)
+				{
+					oppSocket = pairArray[i].player1;
+					pairIndex = i;
+					break;
+				}
+
+			}
+
+		if(oppSocket != null)		
+		{
+			oppSocket.emit("gameOver", 2)
+			oppSocket.set("gameStatus", 0);
+
+		
+			oppSocket.set('playerPlanes', null);		
+
+			pairArray.splice(pairIndex, 1);		
+		}
 		reloadUsers();
 	});
 
-//============================================================	GAME FUNCTIONS =========================================================
+//============================================================	PRE-GAME FUNCTIONS =========================================================
 
 	socket.on('askPlayerForGame', function(opponent){									// asking data for a game.
 		var playerName;
@@ -140,20 +169,40 @@ io.sockets.on('connection', function (socket) { 								// First connection
 		socket.get('playerName', function(err, name) {
 			playerName = name;
 		});
-		socketArray[opponent].emit('questionForGame', playerName);
+
+		var pPlanes;
+
+		socket.get('playerPlanes', function(err, planes){
+				pPlanes = planes;
+		});
+
+		var oPlanes;
+
+		socketArray[opponent].get('playerPlanes', function(err, planes){
+				oPlanes = planes;
+		});
+
+		if(pPlanes == null)
+			socket.emit('planesNotReady');
+		else
+			if( oPlanes == null)
+				socket.emit('oppPlanesNotReady');
+			else
+				socketArray[opponent].emit('questionForGame', playerName);
 
 	});
 
 	socket.on('responseForGame', function(opponent){									// evaluating response from opponent
+		
+		var playerName;
+
+		socket.get('playerName', function(err, name) {
+			playerName = name;
+		});
+
 
 		if(opponent.response == 1)
 		{
-			var playerName;
-
-			socket.get('playerName', function(err, name) {
-				playerName = name;
-			});
-
 			var pair = new PlayerPair(socket, socketArray[opponent.playerName]);
 			pairArray.push(pair);
 
@@ -163,8 +212,14 @@ io.sockets.on('connection', function (socket) { 								// First connection
 			io.sockets.emit('playerReadyStatus',{ playerStatus : 0, playerName : opponent.playerName });
 			io.sockets.emit('playerReadyStatus',{ playerStatus : 0, playerName : playerName });
 
-			socket.emit("startingGame");												// start game for both of them
-			socketArray[opponent.playerName].emit("startingGame");
+			socket.emit("startingGame", opponent.playerName);							// start game for both of them
+			socketArray[opponent.playerName].emit("startingGame", playerName);
+
+			socket.set("round", 1);
+			socketArray[opponent.playerName].set("round", 0);
+
+			socket.emit("roundOppResponse", {hit : -1, i : 0, j : 0 });
+			socketArray[opponent.playerName].emit("roundSelfResponse", {hit : -1, i : 0, j : 0 });
 		}
 		else																			// if the opponent is not ready.
 		{
@@ -172,7 +227,107 @@ io.sockets.on('connection', function (socket) { 								// First connection
 		}
 
 	});
+//======================================================= IN - GAME FUNCIONS =================================================
+
+	socket.on("roundResult", function(data) {
+
+		var oppSocket = null;
+		var round;
+		var pairIndex;
+
+		socket.get('round', function(err, r) {
+			round = r;
+		});
+
+		if (round == 1)
+		{
+
+			for (var i = pairArray.length - 1; i >= 0; i--) 
+			{																			// searching for opponent's socket
+
+				if (pairArray[i].player1 == socket)
+				{
+					oppSocket = pairArray[i].player2;
+					pairIndex = i;
+					break;
+				}
+
+				if (pairArray[i].player2 == socket)
+				{
+					oppSocket = pairArray[i].player1;
+					pairIndex = i;
+					break;
+				}
+
+			}
+
+			if (oppSocket != null)														// if we have an opponent.
+			{
+				var oppPlanes;
+
+				oppSocket.get('playerPlanes', function(err, planes){
+					oppPlanes = planes;
+				});
+
+				var gameStatus;
+
+				socket.get('gameStatus', function(err, status){							// let's see how we're staying, 
+					gameStatus = status;												// if the game ends today
+				});
+
+				var hit = 0;
+
+				for (var i = 0; i < 3; i++)									// let's see if we have a hit.
+				{
+					for (var j = 0; j < 8; j++)
+					{
+						
+						if (oppPlanes[i][j].i==data.i && oppPlanes[i][j].j==data.j)
+						{
+							if ( j == 0 )
+							{
+								hit = 2;
+								gameStatus++;
+							}
+							else
+								hit = 1;
+							break;
+						}
+					}
+				}
+
+				if (gameStatus == 3)
+				{
+					socket.emit("gameOver", 1);
+					oppSocket.emit("gameOver", 0);
+
+					socket.set("gameStatus", 0);
+					oppSocket.set("gameStatus", 0);
+
+					socket.set('playerPlanes', null);
+					oppSocket.set('playerPlanes', null);						// making both players ready again
+
+					pairArray.splice(pairIndex, 1);								// Delete our pair.
+
+				}
+				else
+				{
+					socket.emit("roundSelfResponse", {hit : hit, i : data.i, j : data.j });		// we get the response of what we've hit
+					oppSocket.emit("roundOppResponse", {hit : hit, i : data.i, j : data.j } );		// we announce our opponent what we've hit and it's his turn
+
+					socket.set("round", 0);										// we change rounds;
+					oppSocket.set("round", 1);	
+
+					socket.set("gameStatus", gameStatus);						// Update game status for current player
+				}
+
+			}
+
+		}
+
+	});
 });
+
 
 function playerName(){
 	var playerName;
@@ -185,7 +340,8 @@ function playerName(){
 }
 
 function reloadUsers() { 														// Send the count of the users to all
-	io.sockets.emit('users',{userNo : users-1, allusers: userArray} );
+
+	io.sockets.emit('users',{userNo : userArray.length-1, allusers: userArray} );
 }
 
 function playerNameSet(socket) { 												// Test if the user has a name

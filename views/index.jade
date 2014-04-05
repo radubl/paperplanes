@@ -7,12 +7,19 @@ html
     link(rel='stylesheet', type='text/css', href='index.css') 
     link(rel='stylesheet', href='skeleton.css')
     link(rel='stylesheet', href='layout.css')
+
+    script(src="alertify/lib/alertify.min.js")
+    script(src="alertify/lib/alertify.js")
+   
+    link(rel='stylesheet', href='alertify/themes/alertify.bootstrap.css')
+    link(rel='stylesheet', href='alertify/themes/alertify.core.css')
+
     script(src="/socket.io/socket.io.js")
     script(type='text/javascript', src='http://code.jquery.com/jquery-latest.min.js')
     script(type='text/javascript', src='index.js')
-    link(rel='stylesheet', href='css/jquery-ui-1.10.4.custom.css')
-    script(src='js/jquery-1.10.2.js')
-    script(src='js/jquery-ui-1.10.4.custom.min.js')
+    link(rel='stylesheet', href='jquery/css/jquery-ui-1.10.4.custom.css')
+    script(src='jquery/js/jquery-1.10.2.js')
+    script(src='jquery/js/jquery-ui-1.10.4.custom.min.js')
   body
     span.title
       | Paper Planes
@@ -21,8 +28,25 @@ html
       | a 
       span(style='color: OrangeRed;') battleships 
       | spin-off
+    span.game-info-container 
+      #fuckjquery
+        span.skull-cell(style='margin-left:20px; margin-top:5px;')
+        span.cellInfo Dead
+        span.hit-cell(style='margin-left:20px; margin-top:5px;')
+        span.cellInfo Hit
+        span.air-cell(style='margin-left:20px; margin-top:5px;')
+        span.cellInfo Air
+        #turninfo It's Your Turn
+          #countdown 
+      #second-game-info-box
+        span.info-container2
+          span#reset.btn2  Reset 
+          span#clear_red.btn2(onclick='clearRed()') Clear Red
+          span#randomise.btn2(onclick='randomise()') Randomise
+          span.btn2(onclick='getReady()')
+            span.proceed Submit Planes
     .container
-      .grid(style='padding: 0px; padding-bottom: 10px;')
+      .grid
         #right-grid-getReady
           span.text-box
             span.info-container
@@ -32,7 +56,7 @@ html
                 br
                 | looks like this
               span#example
-            span.info(style='margin: 10px 25px 0px 10px;')
+            span.info(style='margin: 15px 25px -10px 10px;')
               | Draw 
               span(style='color: OrangeRed; opacity: 0.8;') 3 
               | of them and you're ready to go.
@@ -44,12 +68,47 @@ html
               span.btn(onclick='proceed()')
                 span.proceed Proceed
         #right-grid-selectOpp
-          input#filterBox(value='Type Here to Filter' onkeyup='filterOutput()')
-          #oppinfo
-            span.oppinfo#oppnumber Opponents:
-            span.oppinfo#ready ready
-            span.oppinfo#notready not ready
-          #chooseOpp Choose a ready Opponent.
-          #opponents
+          .info-container
+            span#oppnumber 
+            span.ready#ready ready
+          br
+          span.info-container(style='margin-top:15px;')
+            input#filterBox(value='Type Here to Filter' onkeyup='filterOutput()')
+            #opponents
+        #right-grid-Play
+          span.grid-container#oppgrid
       span.grid
-        span#grid-container
+        span.grid-container#yourgrid
+      span#copyright
+        span#copyright-container
+          span#showrules.btn(onclick='showRules()' style='width:170px;') Show Instructions
+          #rulez(style = 'margin:55px 0px 0px 20px;')
+            .info-container(style = 'width:540px; margin-top:20px;')
+              span.rulesSection Short:
+              br
+              br
+              .rule Choose a ready opponent to challenge him to a game.
+              .rule Double click on a square to send missile.
+              .rule The game ends when all 3 planes are hit in the head.
+            .info-container(style = 'width:540px; margin-top:20px;')
+              span.rulesSection Pre-Game Instructions
+              br
+              br
+              .rule A plane has 8 cells, one of which is the head, and it can be placed in nay direction.
+              .rule A player can have 3 planes, and they cannot overlay eachother.
+              .rule You can draw planes freely with your mouse, or you can hit randomise.
+              .rule When you are ready to go, the Proceed button will lighten up.
+              br
+              .rule After you've chosen your name, you'll be automaticly be put in the opponents pool.
+              .rule You can challenge only ready players and you can be challenged only if you are ready.
+            .info-container(style = 'width:540px; margin-top:20px;')
+              span.rulesSection In-Game Instructions
+              br
+              br
+              .rule You can choose a spot on the empty grid to send a missile to your opponent's planes.
+              .rule To send the missile, click again on a red square.
+              .rule If you cannot decide in 30 seconds, the computer will decide in your place.
+              .rule If you hit a plane in the head, it is considered dead.
+              .rule The first player to kill all his opponent's planes wins.
+        span#author-container
+          span#author Created by Radu Blana  |  2014

@@ -6,13 +6,12 @@ body{
 	background-color: #faf8ef;
 	margin-left:auto;
 	margin-right:auto;
-	width:1240px;
+	width: 960px;
 }
 
 .title{
 	text-align: left;
-	width:1190px;
-	margin: 20px 0px 50px 160px;
+	margin: 20px 0px 50px 20px;
 	font-size:50px;
 }
 #battleships-title{
@@ -20,14 +19,17 @@ body{
 	opacity:0.8; 
 	font-size:35px;
 	display: none;
-	margin: 0px 0px 0px 160px;
+	margin: 0px 0px 0px 20px;
 }
-/*====================================== CONTAINERS =============================*/
-#right-grid-selectOpp, #right-grid-Play {
+/*====================================== CONTAINERS =========================================================*/
+#right-grid-selectOpp{ 
 	margin: 10px;
 	width: 390px;
 	height:380px;
 	overflow-y:auto;
+	display: none;
+}
+#right-grid-Play {
 	display: none;
 }
 .text-box{
@@ -51,7 +53,7 @@ body{
 	margin:10px 10px 10px 10px;
 	padding: 10px 0px 0px 10px;
 }
-#grid-container{
+.grid-container{
 	margin:5px;
 }
 .info{
@@ -71,31 +73,27 @@ body{
 	border: 1px solid rgb(233, 233, 233);
 	border-radius: 15px;
 }
+.game-info-container{
+	background-color: rgb(255, 255, 255);
+	height: 85px;
+	width: 0px;
+	position:absolute;
+	right:70px;
+	top:20px;
+	border-radius: 10px;
+	display: none;
+	border-left: 10px solid #776e65;
+	-webkit-transition: all 1.75s ease;
+	-moz-transition: all 1.75s ease;
+	-o-transition: all 1.75s ease;
+	transition: all 1.75s ease;
+}
 #example{
 	width:122px;
 	float:right;
 	margin-right: 20px;
 }
-/*====================================== BUTTONS =================================*/
-.button{
-	text-align: center;
-	color:#776e65;
-	font-size:25px;
-	float:left;
-	margin: 10px 1px 10px 8px;
-	width:170px;
-	background-color: white;
-	border: 1px solid #776e65;
-	border-radius: 4px;
-	-moz-user-select: none; 
-    -khtml-user-select: none; 
-    -webkit-user-select: none; 
-    -o-user-select: none; 
-}
-.button:hover{
-	color:white;
-	background-color: #776e65;
-}
+/*====================================== BUTTONS ===========================================================*/
 .btn {
 	float:left;
 	width: 150px;
@@ -118,7 +116,7 @@ body{
 	transition: all 0.3s ease;
 }
 
-.btn:after {
+.btn:after, .btn2:after{
 	background: gray;
 	color: #FFF;
 	content: ">";
@@ -134,9 +132,13 @@ body{
 	-moz-border-radius: 20px;
 	border-radius: 20px;
 	margin-top: -4px;
+	-webkit-transition: all 0.4s ease ;
+    -moz-transition: all 0.4s ease;
+    -o-transition: all 0.4s ease;  
+    transition: all 0.4s ease;
 }
 
-.btn:hover {
+.btn:hover , .btn2:hover{
 	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 1);
 	-moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 1);
 	box-shadow: 0px 0px 10px rgba(0, 0, 0, 1);
@@ -146,7 +148,27 @@ body{
 	-o-transition: all 0.3s ease;
 	transition: all 0.3s ease;
 }
-
+.btn2{
+float: left;
+width: 150px;
+height: 15px;
+margin: 5px 13px 0px 20px;
+background: #FFF;
+color: gray;
+font: bold 15px "Helvetica";
+padding: 10px;
+text-decoration: none;
+-webkit-border-radius: 10px;
+-moz-border-radius: 10px;
+border-radius: 10px;
+-webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, .25);
+-moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, .25);
+box-shadow: 0px 0px 5px rgba(0, 0, 0, .25);
+-webkit-transition: all 0.3s ease;
+-moz-transition: all 0.3s ease;
+-o-transition: all 0.3s ease;
+transition: all 0.3s ease;
+}
 /*================================================== OTHERS ================================================ */
 .proceed{
 	opacity: 0.4;
@@ -159,8 +181,56 @@ body{
 .proceed-change{
 	opacity: 1;
 }
+.skull-cell{
+	background-image:url('skull.png');
+	float:left;
+	background-color: white;
+	border: 1px solid #776e65;
+	margin:1px;
+	border-radius: 2px;
+	width:35px;
+	height:35px;
+	opacity:0.75;
+}
+.hit-cell{
+	background-image:url('hit.png');
+	float:left;
+	background-color: white;
+	border: 1px solid #776e65;
+	margin:1px;
+	border-radius: 2px;
+	width:35px;
+	height:35px;
+	opacity:0.75;
+}
+.air-cell{
+	background-image:url('air.png');
+	float:left;
+	background-color: white;
+	border: 1px solid #776e65;
+	margin:1px;
+	border-radius: 2px;
+	width:35px;
+	height:35px;
+	opacity:0.75;
+}
+.cellInfo{
+	float:left;
+	padding:13px;
+	padding-right:40px;
+}
 .cell{
 	display: none;
+	float:left;
+	background-color: white;
+	border: 1px solid #776e65;
+	margin:1px;
+	border-radius: 2px;
+	width:35px;
+	height:35px;
+	opacity:0.75;
+}
+.oppcell{
 	float:left;
 	background-color: white;
 	border: 1px solid #776e65;
@@ -190,6 +260,7 @@ body{
 	border-radius: 2px;
 	margin-bottom: 5px;
 	line-height: 35px;
+	margin-left: 3px;
 }
 .selectOpponent:after {
 	background: green;
@@ -260,37 +331,97 @@ input{
 	margin-left: 17px;
 	text-align: center;
 }
-.oppinfo{
-	width:125px;
-	float:left;
-	height:36px;
-	line-height:38px;
+.ready{
+	background: -webkit-linear-gradient(white, #E4E6E6); /* For Safari 5.1 to 6.0 */
+	background: -o-linear-gradient(white, #E4E6E6); /* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(white, #E4E6E6); /* For Firefox 3.6 to 15 */
+	background: linear-gradient(white, #E4E6E6); /* Standard syntax */
+	width:100px;
+	float:right;
+	height:30px;
+	line-height:30px;
 	text-align:center;
+	border:1px solid gray;
+	border-radius: 10px;
+	background-color:white;
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+	margin-right: 5px;
 }
-.oppinfo:after {
+.ready:hover{
+	background: white;
+}
+.ready:after {
+	background: green;
+	color: #FFF;
+	content: "<";
+	display: inline-block;
+	font: bold 11px "Georgia";
+	height: 26px;
+	line-height: 26px;
+	margin: 2px;
+	margin-left:0px;
+	text-align: center;
+	width: 26px;
+	float:right;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+}
+.unready{
+	background: white;
+	width:100px;
+	float:right;
+	height:30px;
+	line-height:30px;
+	text-align:center;
+	border:1px solid gray;
+	border-radius: 10px;
+	background-color:white;
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+	margin-right: 5px;
+}
+.unready:hover{
+	background: -webkit-linear-gradient(#E4E6E6, white); /* For Safari 5.1 to 6.0 */
+	background: -o-linear-gradient(#E4E6E6, white); /* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(#E4E6E6, white); /* For Firefox 3.6 to 15 */
+	background: linear-gradient(#E4E6E6, white); /* Standard syntax */
+}
+.unready:after {
 	background: gray;
 	color: #FFF;
 	content: ">";
 	display: inline-block;
 	font: bold 11px "Georgia";
-	height: 25px;
-	line-height: 25px;
-	margin: 7px 4px 0px 10px;
+	height: 26px;
+	line-height: 26px;
+	margin: 2px;
+	margin-left:0px;
 	text-align: center;
-	width: 25px;
-	float:left;
+	width: 26px;
+	float:right;
 	-webkit-border-radius: 20px;
 	-moz-border-radius: 20px;
 	border-radius: 20px;
-}
-#ready:after{
-	background-color: green;
-}
-#oppnumber:after{
-	display:none;
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
 }
 #oppnumber{
 	text-align:left;
+	font-size:15px;
+	line-height:30px;
+	margin-left: 3px;
 }
 #chooseOpp{
 	clear:both;
@@ -314,4 +445,116 @@ input{
 	font-size:20px;
 	color: rgb(155, 11, 11);
 	margin-top:70px;
+}
+
+#copyright{
+	opacity: 0;
+	background:white;
+	float:left;
+	height:50px;
+	width:860px;
+	margin:10px;
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+}
+#showrules{
+	opacity: 0;	
+	margin: 8px 0px 0px 20px;
+	box-shadow: 0px 0px 4px;
+	-webkit-transition: all 2.5s ease;
+	-moz-transition: all 2.5s ease;
+	-o-transition: all 2.5s ease;
+	transition: all 2.5s ease;
+}
+#showrules:hover:after{
+	transform:rotate(90deg);
+	-ms-transform:rotate(90deg); /* IE 9 */
+	-webkit-transform:rotate(90deg); /* Opera, Chrome, and Safari */
+}
+#author{
+	opacity: 0;
+	float:right;
+	color:#776e65;
+	font-size:17px;
+	margin:13px 20px 0px 0px;
+	-webkit-transition: all 2.5s ease;
+	-moz-transition: all 2.5s ease;
+	-o-transition: all 2.5s ease;
+	transition: all 2.5s ease;
+}
+#copyright-container{
+	border-left: 10px solid #776e65;
+	float: left;
+	border-radius: 10px;
+	height: inherit;
+	width: 0px;
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+	margin-left: 430px;
+}
+#author-container{
+	border-right: 10px solid #776e65;
+	float: right;
+	background-color: white;
+	border-radius: 10px;
+	height: inherit;
+	width: 0px;
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+	margin-right: 410px;
+}
+#turninfo{
+	margin:52px 20px 0px 20px;
+	padding-top:3px;
+	font-size:25px;
+	color:orangered;
+	width:375px;
+	border-top:1px solid #776e65;
+}
+#countdown{
+	float:right;
+	width:50px;
+	color:green;
+}
+#fuckjquery{
+	display: none;
+	float:left;
+}
+#second-game-info-box{
+	display:none;
+}
+#filterBox{
+	font: 20px "Roboto";
+	width: 356px;
+	height: 30px;
+	margin: 10px 0px 10px 3px;
+	line-height: 30px;
+}
+.rulesSection{
+	width:560px;
+	float: left;
+	/* border-bottom:1px solid #776e65; */
+	font-size: 18px;
+	margin-bottom:100px;
+	font-weight: bold;
+	margin: 10px;
+}
+.rule{
+	margin: 5px;
+	line-height: 25px;
+	width: 520px;
+	float: left;
+}
+.rule:before{
+	content:"\25A2 ";
+	margin:5px;
+}
+#rulez{
+	display: none;
 }

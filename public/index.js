@@ -1,4 +1,6 @@
 var matrix = [];
+var oppmatrix = [];
+var chosenPoints = [];
 var openset = [];								// the set of cells to be evaluated
 var planeArray = [];							// the set of arrays that each have 8 cells i.e. a plane.
 var opensetSize = 0;
@@ -11,13 +13,18 @@ var colorsArray = new Array("DarkMagenta","Chocolate","Coral ","Crimson","DarkBl
 
 var chosenColorList = new LinkedList();
 var canproceed = false;
-var proceeded = false;
+var planesLocked = false;
 var socket = io.connect();
 var playerName = '';
 var html = '';
 var allUsers = [];
 var infoContainer = '';
 var playerReady = 1;
+var rulesUp = true;
+var oppName = '';
+var round = 0;
+var timer;
+var chosenOppCell = '';
 
 // initialise the grid:
 window.onload = function (){
@@ -37,7 +44,7 @@ window.onload = function (){
 			}
 		}
 
-		$('#grid-container').html(cells);
+		$('#yourgrid').html(cells);
 		loadExampleCells();
 
 		var array1 = [];
@@ -57,7 +64,16 @@ window.onload = function (){
 				fade_time += 035;
 				$(array1[i]).fadeIn(fade_time);
 			}
-		$('.grid').fadeIn("slow");
+
+		$('.grid').fadeIn("slow", function(){
+
+				$('#copyright').css("opacity", '1');
+				$('#copyright-container').css("margin-left", '0px').css("width", "560");
+				$('#author-container').css("margin-right", '-20px').css("width", "300");
+				$('#author').css("opacity", '1');
+				$('#showrules').css("opacity", '1');
+		});
+
 	});
 }
 
@@ -81,7 +97,7 @@ examplecells += "<span class = 'e-cell' style='border:1px solid rgb(233, 233, 23
 	$('#example').html(examplecells);
 }
 
-$(document).on("click", "#reset", function(){resetGrid(); } );
+$(document).on("click", "#reset", function(){resetGrid(""); } );
 //reset the grid
 
 $(document).on("mouseover", ".cell", function(){
@@ -90,6 +106,21 @@ $(document).on("mouseover", ".cell", function(){
 
 });
 
+$(document).on("mouseover", ".oppcell", function(){
+
+	$(this).css("background-color", undefinedHoverColor).css("opacity" , undefinedOpacity);;
+
+});
+
+$(document).on("mouseleave", ".oppcell", function(){
+	
+	var i = $(this).attr('id').slice(-2).charAt(0);
+	var j = $(this).attr('id').slice(-1);
+	if (oppmatrix[i][j].color=="red" || oppmatrix[i][j].color == undefinedHoverColor)
+		$(this).css("background-color", oppmatrix[i][j].color ).css("opacity" , "1");
+	else
+		$(this).css("background-color", oppmatrix[i][j].color );
+});
 
 $(document).on("mouseleave", ".cell", function(){
 	
@@ -108,7 +139,7 @@ $(document).on("mouseleave", ".cell", function(){
 
 $(document).on("mousedown", ".cell", function(){
 
-if (!proceeded)
+if (!planesLocked)
 {
 	var i = $(this).attr('id').slice(-2).charAt(0);
 	var j = $(this).attr('id').slice(-1);
@@ -361,7 +392,7 @@ function proceed(){
 			$('#right-grid-selectOpp').fadeIn('slow');
 
 		});
-		proceeded = true;
+		planesLocked = true;
 	}
 
 
@@ -432,7 +463,11 @@ function fetchedUsers() {
 		allUsers = data.allusers;
 		
 		$('#opponents').html(oppHtml).slideDown("slow");
-		$('#oppnumber').html("Opponents: " + (data.userNo));
+
+		if (data.userNo == 1)
+			$('#oppnumber').html("There is <strong>" + (data.userNo) +"</strong> Opponent 	&nbsp;	| &nbsp; <strong> You</strong>  are:");
+		else
+			$('#oppnumber').html("There are <strong>" + (data.userNo) +"</strong> Opponents &nbsp;	| &nbsp; <strong> You</strong>  are:");
 	});
 }
 
@@ -461,37 +496,326 @@ $(document).on("click", ".selectOpponent", function(){
 
 socket.on("questionForGame", function(opponent){
 
-	var response = confirm(opponent + " asks you to play a game together.");
+	alertify.set({ labels: {
+    ok     : "Accept",
+    cancel : "Decline"
+} });
 
-	if(response == true)
-	{
-		socket.emit("responseForGame", {playerName : opponent, response : 1} );
-	}
-	else
-	{
-		socket.emit("responseForGame", {playerName : opponent, response : 0} );
-	}
+	alertify.confirm(opponent + " asks you to play a game together.", function (e) {
+    if (e) {
+        socket.emit("responseForGame", {playerName : opponent, response : 1} );
+    } else {
+        socket.emit("responseForGame", {playerName : opponent, response : 0} );
+    }
+	});
+
 });
 
 socket.on("playerDeclined", function(opponent){
-	alert(opponent + "  has rejected your request.");
+
+	alertify.set({ labels: {
+    ok     : "Ok"
+	} });
+
+	alertify.alert(opponent + "  has rejected your request.");
 });
 
-socket.on("startingGame", function(){
+socket.on("startingGame", function(opponent){
 
+	var cells ='';
+
+	oppName = opponent;
+
+	for (var i = 0; i < 10; i++){									// fill the opponent matrix;
+
+		oppmatrix[i] = [];
+
+		for (var j = 0; j < 10; j++){
+
+			oppmatrix[i][j] = new Cell(i,j);
+
+			cells += "<span class = 'oppcell' id='oppcell"+ i + "" + j + "'  ></span>";
+		}
+	}
+
+	for (var i = 0; i < 10; i++){									// fill the chosen Points matrix;
+
+		chosenPoints[i] = [];
+
+		for (var j = 0; j < 10; j++){
+
+			chosenPoints[i][j] = 0;
+		}
+	}
+
+	$('#oppgrid').html(cells);
+
+	$('#right-grid-selectOpp').fadeOut( function(){
+		$('#right-grid-Play').fadeIn(function(){
+			$('.game-info-container').fadeIn('slow', function(){
+				$('.game-info-container').css('width', '420px');
+				setTimeout(function(){$('#fuckjquery').fadeIn("slow");},2000);
+
+			});
+		});
+	});
+
+});
+
+socket.on("planesNotReady", function(){
+		alertify.set({ labels: {
+    ok     : "Ok"
+	} });
+	alertify.alert(" Your planes are not ready.");
+});
+
+
+socket.on("oppPlanesNotReady", function(){
+		alertify.set({ labels: {
+    ok     : "Ok"
+	} });
+	alertify.alert(" Your opponent's planes are not ready.");
+});
+
+//========================================================= IN - GAME FUNCTIONS ============================================
+
+
+socket.on("roundSelfResponse", function(data){
+
+	var cellid = '#oppcell' + data.i + '' + data.j;
+	var color = $(cellid).css("background-color");
+
+	if(data.hit == -1)
+	{
+		$("#turninfo").html("It's " + oppName +"'s Turn <span id='countdown'></span>");
+	}
+
+	if(data.hit == 0){
+
+		$(cellid).addClass("air-cell");
+		$(cellid).css("background-color", color);
+	}
+	else
+		if(data.hit == 1)
+		{
+			$(cellid).addClass("hit-cell");
+			$(cellid).css("background-color", color);
+		}
+		else
+			if(data.hit == 2)
+				{
+					$(cellid).addClass("skull-cell");
+					$(cellid).css("background-color", color);
+				}
+
+});
+
+socket.on("roundOppResponse", function(data){
+
+	//update my grid about opponen's change, change info about rounds, start timer, allow missile sending.
+
+	$("#countdown").css("color", "green");
+	$("#turninfo").html("It's your Turn <span id='countdown'></span>");
+
+	var countdown = 31;
+
+	if(data.hit == -1)
+		var countdown = 34;
+
+	round = 1;
+
+	timer = setInterval( function(){
+
+		countdown--;
+		console.log(countdown);
+
+		var scd = "" + countdown;
+
+		document.getElementById("countdown").innerHTML = scd;
+
+		if (countdown == 5)
+			$("#countdown").css("color", "red");
+
+		if (countdown == 0)											// if we reached the 1 min countdown, radomise and send;
+		{
+			do{
+
+				var chosenI = Math.floor((Math.random()*10));
+				var chosenJ = Math.floor((Math.random()*10));
+
+			}while( chosenPoints[chosenI][chosenJ] != 0)
+
+			chosenPoints[chosenI][chosenJ] = 1;
+
+			socket.emit("roundResult", {i : chosenI, j : chosenJ});
+			clearInterval(timer);
+		}
+	},1000);
+
+	var cellid = '#cell' + data.i + '' + data.j;
+	var color = $(cellid).css("background-color");
+
+	if(data.hit == 0){
+
+		$(cellid).addClass("air-cell");
+		$(cellid).css("background-color", color);
+	}
+	else
+		if(data.hit == 1)
+		{
+			$(cellid).addClass("hit-cell");
+			$(cellid).css("background-color", color);
+		}
+		else
+			if(data.hit == 2)
+				{
+					$(cellid).addClass("skull-cell");
+					$(cellid).css("background-color", color);
+				}
+});
+
+socket.on("gameOver", function(data){
+
+	if(data == 2)
+	{
+			alertify.set({ labels: {
+		    ok     : "Ok"
+			} });
+			alertify.alert("You won. Opponent disconnected.");
+	}
+	else
+		if(data == 1)
+		{
+			alertify.set({ labels: {
+		    ok     : "Ok"
+			} });
+			alertify.alert("You won.");
+		}
+		else
+		{
+			alertify.set({ labels: {
+		    ok     : "Ok"
+			} });
+			alertify.alert("You lost.");
+		}
+
+	$('#ready').css("width", "110");
+
+	setTimeout(function(){
+		$('#ready').removeClass();
+		$('#ready').addClass("unready");
+		$('#ready').html("pending");
+		playerReady = 0;
+	},500);
+
+	$('#fuckjquery').fadeOut("slow", function(){
+		$("#second-game-info-box").fadeIn();
+	});
+
+	$('#right-grid-Play').fadeOut("slow", function(){						// come back to main page
+		$('#right-grid-selectOpp').fadeIn();
+		planesLocked = false;
+		resetGrid("all");
+	});
+});
+
+$(document).on("mousedown", ".oppcell", function()							// player selects a spot to hit on.	
+{
+	if(round == 1)															// if it's his round,
+	{
+		var chosenI = $(this).attr('id').slice(-2).charAt(0);
+		var chosenJ = $(this).attr('id').slice(-1);
+
+		if (oppmatrix[chosenI][chosenJ].color.length == 3)					// if we already selected this cell, send it
+		{
+			chosenPoints[chosenI][chosenJ] = 1;
+			socket.emit("roundResult", {i : chosenI, j : chosenJ});
+			clearInterval(timer);											// stop the countdown.
+			$("#turninfo").html("It's " + oppName +"'s Turn <span id='countdown'></span>");				
+																			// announce opponent turn.
+		}
+		else 																// else, set it's color red;
+		{
+			$(this).css("background-color", "red").css("opacity" ,"1");
+			$(chosenOppCell).css("background-color", "white").css("opacity", undefinedOpacity);
+
+			oppmatrix[chosenI][chosenJ].color = "red";
+
+			if(chosenOppCell.length > 1)
+			{
+				var chosenoppI = chosenOppCell.slice(-2).charAt(0);
+				var chosenoppJ = chosenOppCell.slice(-1);
+
+				oppmatrix[chosenoppI][chosenoppJ].color = "white";
+			}
+		}	
+
+		chosenOppCell = '#oppcell' + chosenI + '' + chosenJ;
+	}
 });
 //============================================================= UTILS ======================================================
 
-function resetGrid(){
+function getReady(){
 
-	for (var i = 0; i < 10; i++)
-		for (var j = 0; j < 10; j++){
-			matrix[i][j] = new Cell(i,j);
-			var id = "#cell" + i + "" + j;
-	
-			$(id).css("background-color", "white");
+	if(canproceed)
+	{
+		socket.emit("setPlayerPlanes", planeArray);	
+		socket.emit("setPlayerReady", 1);
+		planesLocked = true;
+	}
+}
+function resetGrid(option){
 
+	if(option === "all")
+	{
+		var cells ='';
+		
+		for (var i = 0; i < 10; i++){
+
+			matrix[i] = [];
+
+			for (var j = 0; j < 10; j++){
+
+				matrix[i][j] = new Cell(i,j);
+
+				cells += "<span class = 'cell' id='cell"+ i + "" + j + "'  ></span>";
+			}
 		}
+
+		$('#yourgrid').html(cells);
+		loadExampleCells();
+
+		var array1 = [];
+
+		for (var i = 0; i<100;i++)
+			if (i<10)
+				array1[i] = "#cell0" + i;
+			else
+				array1[i] = "#cell" + i;
+
+		shuffle(array1);
+
+		var fade_time = 20;
+
+		for (var i = 0; i<array1.length;i++)
+			{
+				fade_time += 035;
+				$(array1[i]).fadeIn(fade_time);
+			}
+	}
+	else
+	{
+
+		for (var i = 0; i < 10; i++)
+			for (var j = 0; j < 10; j++){
+				matrix[i][j] = new Cell(i,j);
+				var id = "#cell" + i + "" + j;
+		
+				$(id).css("background-color", "white");
+
+			}
+	}
+
 
 		// and reset the stack
 
@@ -504,10 +828,9 @@ function resetGrid(){
 
 function randomise(){
 
-	console.log("hit randomise!");
 	var randomise_count = 0;
 
-	resetGrid();
+	resetGrid("");
 
 	while (randomise_count < 3){
 
@@ -624,14 +947,16 @@ function planeArray_contains(cell){
 
 	var checker = false;
 
-	for (var i = 0; i< planeNumber; i++)
-		for (var j = 0; j<8;j++){
+	for (var i = 0; i < planeNumber; i++)
+	{
+		for (var j = 0; j < 8;j++){
+
 			if (planeArray[i][j].i==cell.i && planeArray[i][j].j==cell.j){
 				checker = true;
 				break;
 			}
 		}
-
+	}
 	return checker;
 }
 
@@ -748,16 +1073,52 @@ $(document).on("blur",'#filterBox', function(){
 });
 
 $(document).on("click",'#ready', function(){
-	console.log(playerReady)
 
-	if (playerReady == 1)
-		playerReady = 0;
-	else
-		playerReady = 1;	
+	if (playerReady == 1)											// if the player is ready and we click
+	{																// it means we wishes to change his readiness
+		setTimeout(function(){
+			$('#ready').removeClass();
+			$('#ready').addClass("unready");
+			$('#ready').html("pending");
+			playerReady = 0;										// make the player unready
+			socket.emit("setPlayerReady", playerReady);						// finally, update his status.
+		},500);
+		$('#ready').css("width", "110");
 
-	socket.emit("setPlayerReady", playerReady);
+	}
+	else 															// else, he is unready and wishes to be ready
+	{
+		setTimeout(function(){
+			$('#ready').removeClass();
+			$('#ready').addClass("ready");
+			$('#ready').html("ready");
+			playerReady = 1;
+			socket.emit("setPlayerReady", playerReady);						// finally, update his status.
+		},500);
+		$('#ready').css("width", "100");
+		
+	}
+
+	
 });
+function showRules(){
 
+	if (rulesUp)
+	{
+		$('#copyright').css("height", "1000px");
+		$('#rulez').fadeIn();
+		rulesUp = false;
+	}
+	else
+	{
+		$('#rulez').fadeOut(function(){
+			$('#copyright').css("height", "50px");
+		});
+		rulesUp = true;
+
+	}
+	
+}
 // ============================================= Linked list implementation ===========================================
 
 function LinkedListNode() {

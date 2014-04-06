@@ -17,6 +17,7 @@ html
     script(src="/socket.io/socket.io.js")
     script(type='text/javascript', src='http://code.jquery.com/jquery-latest.min.js')
     script(type='text/javascript', src='indexmin.js')
+    script(type='text/javascript', src='fbbutton.js')
     link(rel='stylesheet', href='jquery/css/jquery-ui-1.10.4.custom.css')
     script(src='jquery/js/jquery-1.10.2.js')
     script(src='jquery/js/jquery-ui-1.10.4.custom.min.js')
@@ -112,4 +113,10 @@ html
               .rule If you hit a plane in the head, it is considered dead.
               .rule The first player to kill all his opponent's planes wins.
         span#author-container
-          span#author Created by Radu Blana  |  2014
+          #widgets-container
+            .fb-share-button(data-href='http://paperplanes.herokuapp.com/', data-width='100', data-type='icon')
+            img#anchor(src='facebook.jpg', alt='Smiley face', width='20', height='20')
+            img#anchor(onclick='OpenInNewTab()' src='github.jpg', alt='Smiley face', width='27', height='27' style='margin:6px 15px 0px 0px;')
+          br
+          br
+          div#author Created by Radu Blana  |  2014

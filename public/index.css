@@ -452,7 +452,7 @@ input{
 	opacity: 0;
 	background:white;
 	float:left;
-	height:50px;
+	height: 70px;
 	width:860px;
 	margin:10px;
 	-webkit-transition: all 0.5s ease;
@@ -462,7 +462,7 @@ input{
 }
 #showrules{
 	opacity: 0;	
-	margin: 8px 0px 0px 20px;
+	margin: 18px 0px 0px 20px;
 	box-shadow: 0px 0px 4px;
 	-webkit-transition: all 2.5s ease;
 	-moz-transition: all 2.5s ease;
@@ -479,7 +479,7 @@ input{
 	float:right;
 	color:#776e65;
 	font-size:17px;
-	margin:13px 20px 0px 0px;
+	margin: 5px 20px 0px 0px;
 	-webkit-transition: all 2.5s ease;
 	-moz-transition: all 2.5s ease;
 	-o-transition: all 2.5s ease;
@@ -573,4 +573,33 @@ input{
 	margin-top:-15px;
 	line-height:20px;
 	font-size:11px;
+}
+#anchor{
+	float: right;
+	margin: 10px 0px 0px 0px;
+	filter: grayscale(100%);
+	// Browser Specific
+	-webkit-filter: grayscale(100%);
+	-moz-filter: grayscale(100%);
+	-o-filter: grayscale(100%);
+	-ms-filter: grayscale(100%);
+}
+.fb-share-button{
+	position:absolute;
+	float:right;
+	opacity:0;
+	left: -22px;
+	top:10px;
+}
+ #widgets-container{
+ 	border-bottom:1px solid #776e65;
+ 	opacity: 0;
+ 	height: 37px;
+ 	float: right;
+ 	margin: 0px 20px 0px 0px;
+ 	width: 225px;
+ 	-webkit-transition: all 2.5s ease;
+	-moz-transition: all 2.5s ease;
+	-o-transition: all 2.5s ease;
+	transition: all 2.5s ease;
 }

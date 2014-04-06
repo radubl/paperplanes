@@ -72,6 +72,7 @@ window.onload = function (){
 				$('#copyright').css("opacity", '1');
 				$('#copyright-container').css("margin-left", '0px').css("width", "560");
 				$('#author-container').css("margin-right", '-20px').css("width", "300");
+				$('#widgets-container').css("opacity", '1');
 				$('#author').css("opacity", '1');
 				$('#showrules').css("opacity", '1');
 		});
@@ -1154,13 +1155,20 @@ function showRules(){
 	else
 	{
 		$('#rulez').fadeOut(function(){
-			$('#copyright').css("height", "50px");
+			$('#copyright').css("height", "70px");
 		});
 		rulesUp = true;
 
 	}
 	
 }
+
+function OpenInNewTab()
+{
+  var win=window.open('https://github.com/radubl/paperplanes', '_blank');
+  win.focus();
+}
+
 // ============================================= Linked list implementation ===========================================
 
 function LinkedListNode() {

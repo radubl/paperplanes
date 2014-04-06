@@ -73,7 +73,6 @@ io.sockets.on('connection', function (socket) { 								// First connection
 		if(data.length != 3) 													// if player sent other than 3 planes
 		{
 				truePlanes = false;
-			console.log("length 3");
 		}
 		else
 		{
@@ -83,7 +82,7 @@ io.sockets.on('connection', function (socket) { 								// First connection
 			
 			{
 				truePlanes = false;
-				break;console.log("length 8");
+				break;
 			}
 			else
 			{
@@ -93,7 +92,6 @@ io.sockets.on('connection', function (socket) { 								// First connection
 					{
 						truePlanes = false;
 						break;
-						console.log("contains");
 					}
 					else
 						tempPlaneArrayChecker.push(data[i][j]);
@@ -194,10 +192,9 @@ io.sockets.on('connection', function (socket) { 								// First connection
 
 		if(oppSocket != null)		
 		{
-			oppSocket.emit("gameOver", 2)
+			oppSocket.emit("gameOver", {winner : 2})
 			oppSocket.set("gameStatus", 0);
 
-		
 			oppSocket.set('playerPlanes', null);		
 
 			pairArray.splice(pairIndex, 1);		
@@ -232,7 +229,16 @@ io.sockets.on('connection', function (socket) { 								// First connection
 			if( oPlanes == null)
 				socket.emit('oppPlanesNotReady');
 			else
+			{
 				socketArray[opponent].emit('questionForGame', playerName);
+
+				socketArray[opponent].set('playerReady', 0);
+				socket.set('playerReady', 0);
+
+				io.sockets.emit('playerReadyStatus',{ playerStatus : 0, playerName : opponent });
+				io.sockets.emit('playerReadyStatus',{ playerStatus : 0, playerName : playerName });
+
+			}
 
 	});
 
@@ -342,8 +348,16 @@ io.sockets.on('connection', function (socket) { 								// First connection
 
 				if (gameStatus == 3)
 				{
-					socket.emit("gameOver", 1);
-					oppSocket.emit("gameOver", 0);
+					var myPlanes;
+
+					socket.get('playerPlanes', function(err, planes){
+						myPlanes = planes;
+					});
+					socket.emit("roundSelfResponse", {hit : hit, i : data.i, j : data.j });		// we get the response of what we've hit
+					oppSocket.emit("roundOppResponse", {hit : hit, i : data.i, j : data.j } );		// we announce our opponent what we've hit and it's his turn
+					
+					socket.emit("gameOver", { winner : 1, oppPlanes : oppPlanes });
+					oppSocket.emit("gameOver", { winner : 0, oppPlanes : myPlanes});
 
 					socket.set("gameStatus", 0);
 					oppSocket.set("gameStatus", 0);

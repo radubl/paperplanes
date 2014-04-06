@@ -1,3 +1,5 @@
+// sa ramana avionaele pe ecran si sa apara buton de dismiss.
+
 var matrix = [];
 var oppmatrix = [];
 var chosenPoints = [];
@@ -452,7 +454,7 @@ function checkName(){
 
 
 	socket.on('wrongPlanes', function(){
-		
+
 		alertify.alert("Tzc, tzc. You modified some javascript didn't you?");
 
 	});
@@ -510,8 +512,10 @@ socket.on("questionForGame", function(opponent){
 	alertify.confirm(opponent + " asks you to play a game together.", function (e) {
     if (e) {
         socket.emit("responseForGame", {playerName : opponent, response : 1} );
+        socket.emit("setPlayerReady", 0);
     } else {
         socket.emit("responseForGame", {playerName : opponent, response : 0} );
+        socket.emit("setPlayerReady", 1);
     }
 	});
 
@@ -524,6 +528,7 @@ socket.on("playerDeclined", function(opponent){
 	} });
 
 	alertify.alert(opponent + "  has rejected your request.");
+	socket.emit("setPlayerReady", 1);
 });
 
 socket.on("startingGame", function(opponent){
@@ -560,7 +565,10 @@ socket.on("startingGame", function(opponent){
 		$('#right-grid-Play').fadeIn(function(){
 			$('.game-info-container').fadeIn('slow', function(){
 				$('.game-info-container').css('width', '420px');
-				setTimeout(function(){$('#fuckjquery').fadeIn("slow");},2000);
+				setTimeout(function(){$('#second-game-info-box').fadeOut('slow', function(){
+					$('#fuckjquery').fadeIn("slow");
+					});
+				},1000);
 
 			});
 		});
@@ -633,7 +641,6 @@ socket.on("roundOppResponse", function(data){
 	timer = setInterval( function(){
 
 		countdown--;
-		console.log(countdown);
 
 		var scd = "" + countdown;
 
@@ -682,7 +689,7 @@ socket.on("roundOppResponse", function(data){
 
 socket.on("gameOver", function(data){
 
-	if(data == 2)
+	if(data.winner == 2)
 	{
 			alertify.set({ labels: {
 		    ok     : "Ok"
@@ -690,7 +697,7 @@ socket.on("gameOver", function(data){
 			alertify.alert("You won. Opponent disconnected.");
 	}
 	else
-		if(data == 1)
+		if(data.winner == 1)
 		{
 			alertify.set({ labels: {
 		    ok     : "Ok"
@@ -705,25 +712,45 @@ socket.on("gameOver", function(data){
 			alertify.alert("You lost.");
 		}
 
-	$('#ready').css("width", "110");
+	// Here I need to change color of Opponent planes.
 
+	for (var i = 2; i >= 0; i--) 
+	{
+		for (var j = 7; j >= 0; j--) 
+		{
+			var oppcellid = "#oppcell" + data.oppPlanes[i][j].i + '' + data.oppPlanes[i][j].j;
+			oppmatrix[data.oppPlanes[i][j].i][data.oppPlanes[i][j].j] = data.oppPlanes[i][j];
+
+			$(oppcellid).css("background-color", data.oppPlanes[i][j].color);
+		};
+	};
+
+	$('#turninfo').html("<div class='btn2' id='finishUp' onClick='finishGameAndComeBack()'> Finish Up </div>");
+	
+
+});
+
+function finishGameAndComeBack() {
+
+	$('#ready').css("width", "110");
 	setTimeout(function(){
-		$('#ready').removeClass();
+		$('#ready').removeClass();											// set player unready, just in case.
 		$('#ready').addClass("unready");
 		$('#ready').html("pending");
 		playerReady = 0;
 	},500);
 
-	$('#fuckjquery').fadeOut("slow", function(){
+	$('#fuckjquery').fadeOut("slow", function(){							// pop up the plane creation menu
 		$("#second-game-info-box").fadeIn();
 	});
 
-	$('#right-grid-Play').fadeOut("slow", function(){						// come back to main page
-		$('#right-grid-selectOpp').fadeIn();
+	$('#right-grid-Play').fadeOut("slow", function(){						// come back to opponents chosing page.
+		$('#right-grid-selectOpp').fadeIn();								// unlock planes for construction.
 		planesLocked = false;
 		resetGrid("all");
 	});
-});
+
+}
 
 $(document).on("mousedown", ".oppcell", function()							// player selects a spot to hit on.	
 {
@@ -768,6 +795,15 @@ function getReady(){
 		socket.emit("setPlayerPlanes", planeArray);	
 		socket.emit("setPlayerReady", 1);
 		planesLocked = true;
+
+		$('#ready').css("width", "100px");
+
+		setTimeout(function(){
+		$('#ready').removeClass();
+		$('#ready').addClass("ready");
+		$('#ready').html("ready");
+		playerReady = 1;
+		},500);
 	}
 }
 function resetGrid(option){
@@ -1111,7 +1147,7 @@ function showRules(){
 
 	if (rulesUp)
 	{
-		$('#copyright').css("height", "1000px");
+		$('#copyright').css("height", "1020px");
 		$('#rulez').fadeIn();
 		rulesUp = false;
 	}

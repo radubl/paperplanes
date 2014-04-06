@@ -16,7 +16,7 @@ html
 
     script(src="/socket.io/socket.io.js")
     script(type='text/javascript', src='http://code.jquery.com/jquery-latest.min.js')
-    script(type='text/javascript', src='index.js')
+    script(type='text/javascript', src='indexmin.js')
     link(rel='stylesheet', href='jquery/css/jquery-ui-1.10.4.custom.css')
     script(src='jquery/js/jquery-1.10.2.js')
     script(src='jquery/js/jquery-ui-1.10.4.custom.min.js')
@@ -88,13 +88,14 @@ html
               br
               br
               .rule Choose a ready opponent to challenge him to a game.
+              .rule Your planes are on the left and his are on the right.
               .rule Double click on a square to send missile.
               .rule The game ends when all 3 planes are hit in the head.
             .info-container(style = 'width:540px; margin-top:20px;')
               span.rulesSection Pre-Game Instructions
               br
               br
-              .rule A plane has 8 cells, one of which is the head, and it can be placed in nay direction.
+              .rule A plane has 8 cells, one of which is the head, and it can be placed in any direction.
               .rule A player can have 3 planes, and they cannot overlay eachother.
               .rule You can draw planes freely with your mouse, or you can hit randomise.
               .rule When you are ready to go, the Proceed button will lighten up.
